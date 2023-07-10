@@ -54,8 +54,8 @@ if(isset($_POST['login'],$_POST['pwd'])){
     header("Location: ./");         
 }  
 
-if(isset($_SESSION['uniqueId'])&&$_SESSION['uniqueId']==session_id()){    
-    require_once "../view/privateView/privateView.php";
+if(isset($_SESSION['uniqueId'])&& $_SESSION['uniqueId']==session_id()){    
+    require_once "../view/privateView/admin.php";
     if(isset($_POST['insertArticle'])){
         if( false /* verification des champs du formulaire ajout de sous section */){
             // $insertSS = insertSS($db);
@@ -116,7 +116,6 @@ if(isset($_SESSION['uniqueId'])&&$_SESSION['uniqueId']==session_id()){
         header("location: ./");          
     }
     
-
     require_once "../view/privateView/admin.php";
 }
 
@@ -125,21 +124,20 @@ else if(isset($_GET['p'])){
 
     // navigation publique :
     if($_GET['p'] === "home"){
-        
-
-        // on a déjà les sections d'appeler  
-        // $allSection = $sectionManager -> getAll();
-
+        // on a créé les variables en haut parce qu"on en a besoin à 3 endroits différents
         include_once "../view/publicView/homepage.php";
     }
 
     else if($_GET['p'] === "contact"){
+        // on va afficher les infos dans la page contact alors on les appelle ici :
+        $infoManager = new ManagerInfo($db);
+        $allInfo = $infoManager -> getAll();
+
         include_once "../view/publicView/contactView.php";
     }
 
     else if($_GET['p'] === "ressources"){
         $ressourceManager = new ManagerRessource($db);
-        // var_dump($managerTest);
 
         // on recupère toutes les catégories:
         $getAllCateg = $ressourceManager -> getAllCateg();
@@ -150,11 +148,25 @@ else if(isset($_GET['p'])){
     }
 
     else if($_GET['p'] === "livreDor"){
-        // appel de la méthode pour récup les messages du livre d'or avec visible=1 :
+        
+            $livreManager = new ManagerLivreDor($db);
+            // appel de la méthode pour récup les messages du livre d'or avec visible=1 :
+            $allLivreDor = $livreManager -> getAllVisible();
 
+            if(isset($_POST['nameLO'], $_POST['mailLO'], $_POST['messageLO'])){
+                // insertion dans le livre d'or
+                // insertion dans le livre d'or
+                $newMessageLO = new MappingLivreDor([
+                    "mwNameLivreDor" => $_POST['nameLO'],
+                    "mwMailLivreDor" => $_POST['mailLO'],
+                    "mwMessageLivreDor" => $_POST['messageLO']
+                ]);
 
-        // appel de la vue:
-        include_once "../view/publicView/livreDorView.php";
+    
+
+            // appel de la vue:
+            include_once "../view/publicView/livreDorView.php";
+        }
     }
 
     // nav privé
@@ -183,16 +195,12 @@ else if(isset($_GET['p'])){
 else if(isset($_GET['sectionId']) && ctype_digit($_GET['sectionId'])){
     $idSect = (int) $_GET['sectionId'];
     $sectionById = $sectionManager -> getOneById($idSect);
+    
+
     include_once "../view/publicView/sectionView.php";
 }
 
-else if(isset($_GET['ressourcesId']) && ctype_digit($_GET['ressourcesId'])){
-    include_once "../view/publicView/ressourcesView.php";
-}
 
-else if(isset($_POST['nameLO'], $_POST['mailLO'], $_POST['messageLO'])){
-    // insertion dans le livre d'or
-}
 
 else if(isset($_POST['nameContact'], $_POST['mailContact'], $_POST['messageContact'])){
     // envois message / mailer
